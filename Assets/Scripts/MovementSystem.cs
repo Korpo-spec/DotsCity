@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DefaultNamespace;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
@@ -8,19 +9,17 @@ using Korpo.Movement;
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
+
 [BurstCompile]
 public partial struct MovementSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        
+        //Debug.Log(buffer[23*50+7].Value.isWalkable);
         RefRW<RandomComponent> random = SystemAPI.GetSingletonRW<RandomComponent>();
-        /*foreach (var movementAspect in SystemAPI.Query<MovementAspect>())
-        {
-            
-            movementAspect.Move(SystemAPI.Time.DeltaTime);
-        }
-        */
 
         float deltaTime = SystemAPI.Time.DeltaTime;
         JobHandle jobHandle = new MovementJob()
@@ -34,6 +33,14 @@ public partial struct MovementSystem : ISystem
         {
             randomComponent = random
         }.Run();
+
+        
+        new PathFind()
+        {
+            
+        }.ScheduleParallel();
+        
+        
     }
 }
 
@@ -55,10 +62,42 @@ public partial struct TestReachedPositionJob : IJobEntity
     [NativeDisableUnsafePtrRestriction]
     public RefRW<RandomComponent> randomComponent;
     [BurstCompile]
-    public void Execute(MovementAspect movementAspect)
+    public void Execute(PathFindingAspect pathFindingAspect)
     {
+
+        if (pathFindingAspect.movementAspect.TestReachedPosition(randomComponent))
+        {
+            bool validPos = false;
+            while (!validPos)
+            {
+                pathFindingAspect.pathfindingComponent.ValueRW.targetpos = new int2(randomComponent.ValueRW.Random.NextInt(2, 48), randomComponent.ValueRW.Random.NextInt(2, 48));
+                validPos = pathFindingAspect.nodesBuffer[pathFindingAspect.pathfindingComponent.ValueRW.GetNodeIndex(pathFindingAspect.pathfindingComponent.ValueRW.targetpos)].Value.isWalkable;
+            }
+        }
+
         
-        movementAspect.TestReachedPosition(randomComponent);
     }
     
 }
+
+
+public partial struct PathFind : IJobEntity
+{
+    
+    
+    public void Execute(PathFindingAspect pathFindingAspect)
+    {
+        if (!pathFindingAspect.movementAspect.movementComponent.ValueRO.reachedPosition)
+        {
+            return;
+        }
+
+        
+        int2 offset = new int2((int)pathFindingAspect.pathfindingComponent.ValueRO.offset.x, (int)pathFindingAspect.pathfindingComponent.ValueRO.offset.y);
+        int2 startpos = new int2((int)pathFindingAspect.movementAspect.transform.ValueRO.Position.x, (int)pathFindingAspect.movementAspect.transform.ValueRO.Position.z);
+        pathFindingAspect.movementAspect.movementComponent.ValueRW.reachedPosition = false;
+        pathFindingAspect.FindPath(startpos- offset, pathFindingAspect.pathfindingComponent.ValueRO.targetpos);
+    }
+}
+
+
