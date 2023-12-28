@@ -16,7 +16,7 @@ public class Grid<T> : ISerializationCallbackReceiver
     [SerializeField]private int m_Width;
     [SerializeField]private int m_Height;
     [SerializeField]private float m_CellSize;
-    [SerializeField]private Vector3 m_Origin;
+    [SerializeField]public Vector3 m_Origin;
     [SerializeField]private Vector3 m_Normal;
     [SerializeField]private Quaternion m_RotationQuat;
     private Action<Vector2, T[,]> m_ONSetup;

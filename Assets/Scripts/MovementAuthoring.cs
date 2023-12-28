@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Korpo.Movement;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class MovementAuthoring : MonoBehaviour
@@ -13,6 +15,7 @@ public class MovementAuthoring : MonoBehaviour
         public override void Bake(MovementAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
+            DynamicBuffer<PathBufferElement> path = AddBuffer<PathBufferElement>(entity);
             AddComponent(entity, new MovementComponent
             {
                 Speed = authoring.Speed,
