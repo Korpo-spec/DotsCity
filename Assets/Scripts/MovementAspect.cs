@@ -20,7 +20,7 @@ public readonly partial struct MovementAspect : IAspect
     public void Move(float deltaTime)
     {
         transform.ValueRW.Position = Vector3.MoveTowards(transform.ValueRW.Position,
-            movementComponent.ValueRW.TargetPosition, movementComponent.ValueRW.Speed * deltaTime);
+            movementComponent.ValueRW.CurrentTargetPosition, movementComponent.ValueRW.Speed * deltaTime);
 
         
     }
@@ -33,13 +33,13 @@ public readonly partial struct MovementAspect : IAspect
             Debug.DrawLine(new Vector3(path[i].Value.x,0,  path[i].Value.y), new Vector3(path[i+1].Value.x,0,  path[i+1].Value.y), Color.red);
         }'*/
         
-        if (math.distance(transform.ValueRW.Position, movementComponent.ValueRW.TargetPosition) < 0.1f)
+        if (math.distance(transform.ValueRW.Position, movementComponent.ValueRW.CurrentTargetPosition) < 0.1f)
         {
             //movementComponent.ValueRW.TargetPosition = GetRandomPosition(component);
             if (path.Length > 0)
             {
                 var nextPosition = path[path.Length - 1].Value;
-                movementComponent.ValueRW.TargetPosition = new float3(nextPosition.x, 0, nextPosition.y);
+                movementComponent.ValueRW.CurrentTargetPosition = new float3(nextPosition.x, 0, nextPosition.y);
                 path.RemoveAt(path.Length - 1);
             }
             else

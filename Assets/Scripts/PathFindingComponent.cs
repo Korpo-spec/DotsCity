@@ -11,7 +11,7 @@ namespace Korpo.Movement
 
         public float3 offset;
         
-        public int2 targetpos;
+        //public int2 targetpos;
 
         //[NonSerialized]public DynamicBuffer<Node> nodes;
         

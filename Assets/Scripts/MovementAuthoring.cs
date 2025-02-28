@@ -19,7 +19,7 @@ public class MovementAuthoring : MonoBehaviour
             AddComponent(entity, new MovementComponent
             {
                 Speed = authoring.Speed,
-                TargetPosition = authoring.TargetPosition
+                CurrentTargetPosition = authoring.TargetPosition
             });
         
         }

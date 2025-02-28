@@ -233,6 +233,7 @@ public class Grid<T> : ISerializationCallbackReceiver
 
 
     [SerializeField] private List<SerializeDataMap<T>> _serializeDataMaps; 
+    private HashSet<T> _serializedValues;
     public void OnBeforeSerialize()
     {
         if (m_Grid == null)
@@ -260,6 +261,7 @@ public class Grid<T> : ISerializationCallbackReceiver
         {
             _serializeDataMaps.Clear();
         }
+        _serializedValues = new HashSet<T>();
         
         for (int i = 0; i < m_Grid.GetLength(1); i++)
         {
@@ -272,8 +274,26 @@ public class Grid<T> : ISerializationCallbackReceiver
                     {
                         continue;
                     }
-                    _serializeDataMaps.Add(new SerializeDataMap<T>()
-                        {positionX = j, positionY = i, value = GetValue(j,i)});
+
+                    if (_serializedValues.Add(value))
+                    {
+                        _serializeDataMaps.Add(new SerializeDataMap<T>()
+                            {positionX = j, positionY = i, value = GetValue(j,i), pointerValueX = -1, pointerValueY = -1});
+                    }
+                    else
+                    {
+                        //Debug.Log("Item has appeared before, Rerouting");
+                        for (int k = 0; k < _serializeDataMaps.Count; k++)
+                        {
+                            if (_serializeDataMaps[k].value.Equals(value))
+                            {
+                                _serializeDataMaps.Add(new SerializeDataMap<T>()
+                                    {positionX = j, positionY = i, value = GetValue(j,i), pointerValueX = _serializeDataMaps[k].positionX, pointerValueY = _serializeDataMaps[k].positionY});
+                                break;
+                            }
+                        }
+                    }
+                    
                 }
                 
             }
@@ -285,6 +305,7 @@ public class Grid<T> : ISerializationCallbackReceiver
 
     public void OnAfterDeserialize()
     {
+        Debug.Log("Deserializing");
         if (m_Grid == null || m_Grid.Length == 0)
         {
             //Debug.Log("Create new grid");
@@ -302,6 +323,12 @@ public class Grid<T> : ISerializationCallbackReceiver
 
         foreach (var data in _serializeDataMaps)
         {
+            if (data.pointerValueX != -1 && data.pointerValueY != -1)
+            {
+                SetValue(data.positionX, data.positionY, m_Grid[data.pointerValueX, data.pointerValueY]);
+                continue;
+            }
+            
             SetValue(data.positionX, data.positionY, data.value);
         }
 
@@ -314,4 +341,7 @@ public struct SerializeDataMap<T>
     public int positionX;
     public int positionY;
     public T value;
+    public int pointerValueX;
+    public int pointerValueY;
+    
 }

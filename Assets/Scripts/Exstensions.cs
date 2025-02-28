@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public static class Exstentions 
 {
@@ -33,6 +35,16 @@ public static class Exstentions
     public static T GetRandom<T>(this List<T> list)
     {
         return list[Random.Range(0, list.Count)];
+    }
+    
+    public static int2 ToInt2(this float3 vec)
+    {
+        return new int2((int)vec.x, (int)vec.z);
+    }
+    
+    public static int2 ToInt2(this Vector3 vec)
+    {
+        return new int2((int)vec.x, (int)vec.z);
     }
 
     

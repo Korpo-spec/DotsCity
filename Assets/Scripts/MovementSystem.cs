@@ -70,8 +70,8 @@ public partial struct TestReachedPositionJob : IJobEntity
             bool validPos = false;
             while (!validPos)
             {
-                pathFindingAspect.pathfindingComponent.ValueRW.targetpos = new int2(randomComponent.ValueRW.Random.NextInt(2, 48), randomComponent.ValueRW.Random.NextInt(2, 48));
-                validPos = pathFindingAspect.nodesBuffer[pathFindingAspect.pathfindingComponent.ValueRW.GetNodeIndex(pathFindingAspect.pathfindingComponent.ValueRW.targetpos)].Value.isWalkable;
+                pathFindingAspect.movementAspect.movementComponent.ValueRW.TargetPosition = new int2(randomComponent.ValueRW.Random.NextInt(2, 48), randomComponent.ValueRW.Random.NextInt(2, 48));
+                validPos = pathFindingAspect.nodesBuffer[pathFindingAspect.pathfindingComponent.ValueRW.GetNodeIndex(pathFindingAspect.movementAspect.movementComponent.ValueRW.TargetPosition)].Value.isWalkable;
             }
         }
 
@@ -96,7 +96,7 @@ public partial struct PathFind : IJobEntity
         int2 offset = new int2((int)pathFindingAspect.pathfindingComponent.ValueRO.offset.x, (int)pathFindingAspect.pathfindingComponent.ValueRO.offset.y);
         int2 startpos = new int2((int)pathFindingAspect.movementAspect.transform.ValueRO.Position.x, (int)pathFindingAspect.movementAspect.transform.ValueRO.Position.z);
         pathFindingAspect.movementAspect.movementComponent.ValueRW.reachedPosition = false;
-        pathFindingAspect.FindPath(startpos- offset, pathFindingAspect.pathfindingComponent.ValueRO.targetpos);
+        pathFindingAspect.FindPath(startpos- offset, pathFindingAspect.movementAspect.movementComponent.ValueRO.TargetPosition);
     }
 }
 

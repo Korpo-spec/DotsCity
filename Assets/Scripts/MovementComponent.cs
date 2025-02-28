@@ -7,7 +7,8 @@ using UnityEngine;
 public struct MovementComponent : IComponentData
 {
     public float Speed;
-    public float3 TargetPosition;
+    public int2 TargetPosition;
+    public float3 CurrentTargetPosition;
     public bool reachedPosition;
 }
 

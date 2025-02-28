@@ -104,7 +104,7 @@ public class MapPlaceTool : EditorTool, IDrawSelectedHandles
         if (currentEvent.type == EventType.MouseDrag && currentEvent.button == 0 &&
             map.map.m_Plane.Raycast(ray, out float enter))
         {
-
+            
             Debug.Log("Trying to remove building");
             Vector3 pos = ray.GetPoint(enter);
             pos.x = Mathf.Floor(pos.x);
@@ -114,12 +114,17 @@ public class MapPlaceTool : EditorTool, IDrawSelectedHandles
             Building buildingToRemove = map.map.GetValueWorldPosition(pos.ConvertToXZVector2());
             if( buildingToRemove == null)
                 return;
+            Undo.IncrementCurrentGroup();
+            int groupIndex = Undo.GetCurrentGroup();
             map.Remove(pos.ConvertToXZVector2());
-            DestroyImmediate(buildingToRemove.gameObject);
+            Undo.RegisterCompleteObjectUndo(map, "Remove Object From Map");
+            Undo.DestroyObjectImmediate(buildingToRemove.gameObject);
+            Undo.CollapseUndoOperations(groupIndex);
         }
     }
     private void PlaceEditorBuilding()
     {
+        
         Map map = target as Map;
         Building building = map.placeBuilding.GetComponent<Building>();
         Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
@@ -127,6 +132,8 @@ public class MapPlaceTool : EditorTool, IDrawSelectedHandles
         
         if ( currentEvent.type == EventType.MouseDrag && currentEvent.button == 0 && map.map.m_Plane.Raycast(ray, out float enter))
         {
+            Undo.IncrementCurrentGroup();
+            int groupIndex = Undo.GetCurrentGroup();
             
             Vector3 pos = ray.GetPoint(enter);
             pos.x = Mathf.Floor(pos.x);
@@ -158,6 +165,11 @@ public class MapPlaceTool : EditorTool, IDrawSelectedHandles
             g.transform.rotation = Quaternion.identity;
             
             map.Place(g.GetComponent<Building>(), pos.ConvertToXZVector2(), Quaternion.identity);
+            
+            Undo.RegisterCompleteObjectUndo(map, "Add Object To Map");
+            Undo.RegisterCreatedObjectUndo(g, "Add Object To Map");
+            // Finalize the group
+            Undo.CollapseUndoOperations(groupIndex);
             
             EditorUtility.SetDirty(g.gameObject);
             AssetDatabase.SaveAssetIfDirty(g.gameObject);
